@@ -33,14 +33,22 @@ positions_cross = {
     8 : (((450, 450), (550, 550)), ((550, 450), (450, 550)))
 }
 
-board = ["-", "-", "-", "-", "-", "-", "-", "-", "-"]
+positions_line = {
+    0 : ((10, 100), (590, 100)),
+    1 : ((10, 300), (590, 300)),
+    2 : ((10, 500), (590, 500)),
+    3 : ((100, 10), (100, 590)),
+    4 : ((300, 10), (300, 590)),
+    5 : ((500, 10), (500, 590)),
+    6 : ((20, 20), (580, 580)),
+    7 : ((580, 20), (20, 580))
+}
 
+board = ["-"] * 9
 turn = "X"
-
 running = True
 
-def check_winner(brd):
-    winning_combinations = [
+winning_combinations = [
         (0, 1, 2),
         (3, 4, 5),
         (6, 7, 8),
@@ -50,72 +58,61 @@ def check_winner(brd):
         (0, 4, 8),
         (2, 4, 6)
     ]
+
+def check_winner(brd):
     for i in winning_combinations:
-        if brd[i[0]] == brd[i[1]] == brd[i[2]] and brd[i[0]] != "-":
-            return True, i
-        else:
-            return False
+        if brd[i[0]] == brd[i[1]] == brd[i[2]] and brd[i[0]] in ("X", "O"):
+            return True, brd[i[0]], i
+    return False, None, None
+
 
 while running:
+    iswinner, winner, combo = check_winner(board)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    if check_winner(board) is not True and board.count("-") > 0:
-        window.fill((255, 255, 255))
-
-        pygame.draw.line(window, (0, 0, 0), (200, 0), (200, 600), 5)
-        pygame.draw.line(window, (0, 0, 0), (400, 0), (400, 600), 5)
-        pygame.draw.line(window, (0, 0, 0), (0, 200), (600, 200), 5)
-        pygame.draw.line(window, (0, 0, 0), (0, 400), (600, 400), 5)
-        pygame.draw.line(window, (0, 0, 0), (0, 600), (600, 600), 5)
-
-        if check_winner(board) is True:
-            text_nxt = font_75.render('Jej', True, (0, 0, 0))
-            rect_nxt = text_nxt.get_rect(center=(250, 200))
-            window.blit(text_nxt, rect_nxt)
-        elif board.count("-") == 0:
-            window.fill((255, 0, 0))
-            text_nxt = font_75.render('No', True, (0, 0, 0))
-            rect_nxt = text_nxt.get_rect(center=(250, 200))
-            window.blit(text_nxt, rect_nxt)
-
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and not iswinner and board.count("-") > 0:
             mouse_x, mouse_y = pygame.mouse.get_pos()
+
             spot = None
-            if mouse_x < 200 and mouse_y < 200:
-                spot = 0
-            elif 200 < mouse_x < 400 and mouse_y < 200:
-                spot = 1
-            elif 400 < mouse_x < 600 and mouse_y < 200:
-                spot = 2
-            elif mouse_x < 200 and 200 < mouse_y < 400:
-                spot = 3
-            elif 200 < mouse_x < 400 and 200 < mouse_y < 400:
-                spot = 4
-            elif 400 < mouse_x < 600 and 200 < mouse_y < 400:
-                spot = 5
-            elif mouse_x < 200 and 400 < mouse_y < 600:
-                spot = 6
-            elif 200 < mouse_x < 400 and 400 < mouse_y < 600:
-                spot = 7
-            elif 400 < mouse_x < 600 and 400 < mouse_y < 600:
-                spot = 8
+            if mouse_y < 600:
+                row = mouse_y // 200
+                col = mouse_x // 200
+                spot = row * 3 + col
 
             if spot is not None and board[spot] == "-":
                 board[spot] = turn
-                turn = "O" if turn == "X" else "X"       
+                turn = "O" if turn == "X" else "X"
 
-        pos = -1
-        for x in board:
-            pos += 1
-            if x == "O":
+    window.fill((255, 255, 255))
+
+    pygame.draw.line(window, (0, 0, 0), (200, 0), (200, 600), 5)
+    pygame.draw.line(window, (0, 0, 0), (400, 0), (400, 600), 5)
+    pygame.draw.line(window, (0, 0, 0), (0, 200), (600, 200), 5)
+    pygame.draw.line(window, (0, 0, 0), (0, 400), (600, 400), 5)
+    pygame.draw.line(window, (0, 0, 0), (0, 600), (600, 600), 5)
+
+
+    for pos, mark in enumerate(board):
+        if iswinner and combo is not None and pos in winning_combinations[winning_combinations.index(combo)]:
+            if mark == "O":
+                pygame.draw.circle(window, (255, 0, 0), positions_cirle[pos], 65, 35)
+                pygame.draw.line(window, (255, 0, 0), positions_line[winning_combinations.index(combo)][0], positions_line[winning_combinations.index(combo)][1], 30)
+            elif mark == "X":
+                pygame.draw.line(window, (0, 0, 255), positions_cross[pos][0][0], positions_cross[pos][0][1], 45)
+                pygame.draw.line(window, (0, 0, 255), positions_cross[pos][1][0], positions_cross[pos][1][1], 45)
+                pygame.draw.line(window, (0, 0, 255), positions_line[winning_combinations.index(combo)][0], positions_line[winning_combinations.index(combo)][1], 30)
+        else:
+            if mark == "O":
                 pygame.draw.circle(window, (255, 0, 0), positions_cirle[pos], 65, 15)
-            elif x == "X":
+            elif mark == "X":
                 pygame.draw.line(window, (0, 0, 255), positions_cross[pos][0][0], positions_cross[pos][0][1], 25)
                 pygame.draw.line(window, (0, 0, 255), positions_cross[pos][1][0], positions_cross[pos][1][1], 25)
-        
+
+
+    if not iswinner and board.count("-") > 0:
         text_next = font_75.render('na ťahu:', True, (0, 0, 0))
         rect_next = text_next.get_rect(center=(250, 700))
         window.blit(text_next, rect_next)
@@ -126,18 +123,24 @@ while running:
         else:
             pygame.draw.circle(window, (255, 0, 0), (400, 700), 32.5, 12)
 
-        pygame.display.update()
+    if iswinner and winner == "X":
+        text_next = font_75.render('Vyhral', True, (0, 0, 0))
+        rect_next = text_next.get_rect(center=(250, 700))
+        window.blit(text_next, rect_next)
+        pygame.draw.line(window, (0, 0, 255), (375, 675), (425, 725), 30)
+        pygame.draw.line(window, (0, 0, 255), (425, 675), (375, 725), 30)
 
-    elif check_winner(board) is True:
-        pass
+    if iswinner and winner == "O":
+        text_next = font_75.render('Vyhral', True, (0, 0, 0))
+        rect_next = text_next.get_rect(center=(250, 700))
+        window.blit(text_next, rect_next)
+        pygame.draw.circle(window, (255, 0, 0), (400, 700), 32.5, 20)
 
-    elif check_winner(board) is not True and board.count("-") == 0:
-        window.fill((0, 0, 0))
+    if not iswinner and board.count("-") == 0:
+        text_next = font_75.render('Je to remíza!', True, (0, 0, 0))
+        rect_next = text_next.get_rect(center=(300, 700))
+        window.blit(text_next, rect_next)
 
-        text_tie = font_75.render('Je to remíza!', True, (255, 255, 255))
-        rect_tie = text_tie.get_rect(center=(300, 400))
-        window.blit(text_tie, rect_tie)
-
-        pygame.display.update()
+    pygame.display.update()
 
 pygame.quit()
