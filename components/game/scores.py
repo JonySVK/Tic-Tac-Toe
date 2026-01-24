@@ -1,3 +1,5 @@
+# Created by Jan Ivicic © 2025 - 2026
+
 class Scores:
     def __init__(self):
         self.player_x_score = 0

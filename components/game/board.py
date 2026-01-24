@@ -1,3 +1,5 @@
+# Created by Jan Ivicic © 2025 - 2026
+
 class Board:
     def __init__(self, scores, player_x, player_o, board_size):
         self.board_size = board_size

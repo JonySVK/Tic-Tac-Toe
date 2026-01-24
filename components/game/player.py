@@ -1,3 +1,5 @@
+# Created by Jan Ivicic © 2025 - 2026
+
 class Player:
     def __init__(self, name, symbol, scores):
         self.scores = scores

@@ -1,3 +1,5 @@
+# Created by Jan Ivicic © 2025 - 2026
+
 import pygame
 from start import Start
 from components.game.player import Player
@@ -76,6 +78,10 @@ class Game:
                         self.turn = "O" if self.turn == "X" else "X"
                     else:
                         pass
+                    
+                    self.reset_button_rect = pygame.Rect(540, 0, 60, 60)
+                    if self.reset_button_rect.collidepoint(mouse_pos):
+                        Game().run()
                 
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.newgame == True:
                     self.board.board = ["-"] * (9 if self.user_settings["board_size"] == 3 else (16 if self.user_settings["board_size"] == 4 else (25 if self.user_settings["board_size"] == 5 else 0)))

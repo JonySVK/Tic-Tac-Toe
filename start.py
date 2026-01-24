@@ -1,3 +1,5 @@
+# Created by Jan Ivicic © 2025 - 2026
+
 import pygame
 from components.start.select import Select
 from components.colors import Colors

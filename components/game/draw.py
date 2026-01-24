@@ -1,3 +1,5 @@
+# Created by Jan Ivicic © 2025 - 2026
+
 import pygame
 
 pygame.init()
@@ -21,6 +23,11 @@ class Draw:
         self.window.fill((255, 255, 255))
         
     def draw_board(self):
+        pygame.draw.circle(self.window, (0, 0, 0), (570, 30), 22.5, 5)
+        pygame.draw.line(self.window, (255, 255, 255), (570, 30), (540, 40), 20)
+        pygame.draw.line(self.window, (0, 0, 0), (567, 34), (556, 41), 5)
+        pygame.draw.line(self.window, (0, 0, 0), (558, 58), (556, 41), 5)
+
         if self.user_settings["board_size"] == 3:
             self.text_playerx = self.font_45.render(self.player_x.name, True, (0, 0, 0))
             self.rect_playerx = self.text_playerx.get_rect(center=(200, 150))
