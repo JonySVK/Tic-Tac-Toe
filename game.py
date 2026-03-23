@@ -7,6 +7,8 @@ from components.game.scores import Scores
 from components.game.board import Board
 from components.game.draw import Draw
 from components.colors import Colors
+from ai.minimax import Minimax
+from ai.chaos import Chaos
 
 pygame.init()
 pygame.font.init()
@@ -36,6 +38,29 @@ class Game:
         self.board = Board(self.scores, self.player_x, self.player_o, self.user_settings["board_size"])
         self.draw = Draw(self.player_x, self.player_o, self.user_settings)
 
+        if "Hráč vs. Počítač" in self.user_settings["game_mode"]:
+            self.ai_mode = True
+            self.ai_mode_difficulty = self.user_settings["game_mode"].replace("Hráč vs. Počítač ", "")
+            self.minimax = Minimax(self.user_settings["board_size"], "O")
+            if self.ai_mode_difficulty == "EASY":
+                self.depth = 2
+            elif self.ai_mode_difficulty == "MEDIUM":
+                self.depth = 4
+            elif self.ai_mode_difficulty == "HARD":
+                self.depth = 6
+            elif self.ai_mode_difficulty == "EXPERT":
+                self.depth = 9
+            elif "CHAOS" in self.ai_mode_difficulty:
+                self.depth = 6
+                self.chaos = Chaos()
+        elif "Hráč vs. Hráč CHAOS" in self.user_settings["game_mode"]:
+            self.ai_mode = False
+            self.ai_mode_difficulty = "CHAOS"
+            self.chaos = Chaos()
+        else:
+            self.ai_mode = False
+            self.ai_mode_difficulty = None
+
         pygame.display.set_caption("Tic-Tac-Toe")
 
         self.turn = "X"
@@ -49,6 +74,8 @@ class Game:
             self.draw.draw_board()
 
             self.iswinner, self.winner, self.combo = self.board.check_winner(self.board.board)
+
+            self.chaosmode = None
 
             for event in pygame.event.get():
                 mouse_pos = pygame.mouse.get_pos()
@@ -75,6 +102,7 @@ class Game:
 
                     if spot is not None and spot < len(self.board.board) and self.board.board[spot] == "-":
                         self.board.board[spot] = self.turn
+                        self.chaosmode = True
                         self.turn = "O" if self.turn == "X" else "X"
                     else:
                         pass
@@ -82,6 +110,15 @@ class Game:
                     self.reset_button_rect = pygame.Rect(540, 0, 60, 60)
                     if self.reset_button_rect.collidepoint(mouse_pos):
                         Game().run()
+                
+                if self.ai_mode and self.turn == "O" and not self.iswinner and self.board.board.count("-") > 0:
+                    ai_move = self.minimax.find_ai_best_move(self.board.board, self.depth)
+                    self.board.board[ai_move] = "O"
+                    self.turn = "X"
+
+                if self.ai_mode_difficulty == "CHAOS" and not self.iswinner and self.board.board.count("-") > 0 and self.chaosmode is True:
+                    self.chaos.chaos(self.board.board)
+                    self.chaosmode = False
                 
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.newgame == True:
                     self.board.board = ["-"] * (9 if self.user_settings["board_size"] == 3 else (16 if self.user_settings["board_size"] == 4 else (25 if self.user_settings["board_size"] == 5 else 0)))

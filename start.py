@@ -23,7 +23,7 @@ class Start:
 
         pygame.display.set_caption("Tic-Tac-Toe")
 
-        self.select1 = Select(["Hráč vs. Hráč", "Hráč vs. Počítač"])
+        self.select1 = Select(["Hráč vs. Hráč", "Hráč vs. Počítač EASY", "Hráč vs. Počítač MEDIUM", "Hráč vs. Počítač HARD", "Hráč vs. Počítač EXPERT", "Hráč vs. Hráč CHAOS", "Hráč vs. Počítač CHAOS"])
         self.select2 = Select(["3x3", "4x4", "5x5"])
         self.select3 = Select(self.colors.get_color_list(without=["Black", "White"], default="Blue"))
         self.select4 = Select(self.colors.get_color_list(without=["Black", "White"], default="Red"))
@@ -102,7 +102,7 @@ class Start:
                             self.game_mode = self.select1.get_current_option()
                             self.board_size = int(self.select2.get_current_option()[0])
                             self.player_x_name = self.user_text_x if self.user_text_x != "" else "Hráč 1"
-                            self.player_y_name = self.user_text_y if self.user_text_y != "" else "Hráč 2"
+                            self.player_y_name = (self.user_text_y if self.user_text_y != "" else "Hráč 2") if "Hráč vs. Hráč" in self.game_mode else "AI hráč"
                             self.player_x_color = self.select3.get_current_option()
                             self.player_y_color = self.select4.get_current_option()
                             return [self.game_mode, self.board_size, self.player_x_name, self.player_y_name, self.player_x_color, self.player_y_color]
@@ -148,7 +148,7 @@ class Start:
                         self.game_mode = self.select1.get_current_option()
                         self.board_size = int(self.select2.get_current_option()[0])
                         self.player_x_name = self.user_text_x if self.user_text_x != "" else "Hráč 1"
-                        self.player_y_name = self.user_text_y if self.user_text_y != "" else "Hráč 2"
+                        self.player_y_name = (self.user_text_y if self.user_text_y != "" else "Hráč 2") if "Hráč vs. Hráč" in self.game_mode else "AI hráč"
                         self.player_x_color = self.select3.get_current_option()
                         self.player_y_color = self.select4.get_current_option()
                         return [self.game_mode, self.board_size, self.player_x_name, self.player_y_name, self.player_x_color, self.player_y_color]
@@ -198,21 +198,21 @@ class Start:
             self.window.blit(text_opt1, rect_opt1)
 
             text_left1 = self.font_40.render("<", True, (0, 0, 0))
-            rect_left1 = text_left1.get_rect(center=(150, 275))
+            rect_left1 = text_left1.get_rect(center=(125, 275))
             self.window.blit(text_left1, rect_left1)
 
             text_right1 = self.font_40.render(">", True, (0, 0, 0))
-            rect_right1 = text_right1.get_rect(center=(450, 275))
+            rect_right1 = text_right1.get_rect(center=(475, 275))
             self.window.blit(text_right1, rect_right1)
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if rect_left1.collidepoint((mouse_x, mouse_y)):
                 text_left1 = self.font_40.render("<", True, self.color_x)
-                rect_left1 = text_left1.get_rect(center=(150, 275))
+                rect_left1 = text_left1.get_rect(center=(125, 275))
                 self.window.blit(text_left1, rect_left1)
             elif rect_right1.collidepoint((mouse_x, mouse_y)):
                 text_right1 = self.font_40.render(">", True, self.color_o)
-                rect_right1 = text_right1.get_rect(center=(450, 275))
+                rect_right1 = text_right1.get_rect(center=(475, 275))
                 self.window.blit(text_right1, rect_right1)
 
 
@@ -227,27 +227,27 @@ class Start:
             self.window.blit(text_opt2, rect_opt2)
 
             text_left2 = self.font_40.render("<", True, (0, 0, 0))
-            rect_left2 = text_left2.get_rect(center=(150, 400))
+            rect_left2 = text_left2.get_rect(center=(125, 400))
             self.window.blit(text_left2, rect_left2)
 
             text_right2 = self.font_40.render(">", True, (0, 0, 0))
-            rect_right2 = text_right2.get_rect(center=(450, 400))
+            rect_right2 = text_right2.get_rect(center=(475, 400))
             self.window.blit(text_right2, rect_right2)
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if rect_left2.collidepoint((mouse_x, mouse_y)):
                 text_left2 = self.font_40.render("<", True, self.color_x)
-                rect_left2 = text_left2.get_rect(center=(150, 400))
+                rect_left2 = text_left2.get_rect(center=(125, 400))
                 self.window.blit(text_left2, rect_left2)
             elif rect_right2.collidepoint((mouse_x, mouse_y)):
                 text_right2 = self.font_40.render(">", True, self.color_o)
-                rect_right2 = text_right2.get_rect(center=(450, 400))
+                rect_right2 = text_right2.get_rect(center=(475, 400))
                 self.window.blit(text_right2, rect_right2)
 
             pygame.draw.line(self.window, self.color_x, (125, 525), (175, 475), 20)
             pygame.draw.line(self.window, self.color_x, (175, 525), (125, 475), 20)
 
-            pygame.draw.circle(self.window, self.color_o, (450, 500), 32.5, 12)
+            pygame.draw.circle(self.window, self.color_o, (475, 500), 32.5, 12)
 
             self.text_x = self.font_40.render("Zadaj meno:", True, (0, 0, 0))
             self.rect_x = self.text_x.get_rect(center=(150, 575))
@@ -264,7 +264,7 @@ class Start:
             self.rect_x_o = pygame.Rect(25, 600, 250, 40)
             pygame.draw.rect(self.window, (0, 0, 0), self.rect_x_o, 3)
 
-            self.text_y = self.font_35.render(self.user_text_y, True, (0, 0, 0))
+            self.text_y = self.font_35.render((self.user_text_y if "Hráč vs. Hráč" in opt1 else "AI hráč"), True, (0, 0, 0))
             self.rect_y = self.text_y.get_rect(center=(450, 620))
             self.window.blit(self.text_y, self.rect_y)
 

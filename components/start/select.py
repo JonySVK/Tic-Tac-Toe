@@ -1,3 +1,5 @@
+# Created by Jan Ivicic © 2025 - 2026
+
 class Select:
     def __init__(self, options):
         self.options = options
