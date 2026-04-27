@@ -1,5 +1,7 @@
 # Created by Jan Ivicic © 2025 - 2026
 
+import math
+
 import pygame
 
 pygame.init()
@@ -16,13 +18,15 @@ class Draw:
         self.color_o = self.user_settings["player_o_color"][1]
 
         self.font_75 = pygame.font.SysFont(None, 75)
+        self.font_60 = pygame.font.SysFont(None, 60)
         self.font_45 = pygame.font.SysFont(None, 45)
         self.font_30 = pygame.font.SysFont(None, 30)
+        self.font_25 = pygame.font.SysFont(None, 25)
 
         self.window = pygame.display.set_mode((600, 1000))
         self.window.fill((255, 255, 255))
         
-    def draw_board(self):
+    def draw_board(self):        
         pygame.draw.circle(self.window, (0, 0, 0), (570, 30), 22.5, 5)
         pygame.draw.line(self.window, (255, 255, 255), (570, 30), (540, 40), 20)
         pygame.draw.line(self.window, (0, 0, 0), (567, 34), (556, 41), 5)

@@ -1,8 +1,10 @@
 # Created by Jan Ivicic © 2025 - 2026
 
 import pygame
+import os
 from components.start.select import Select
 from components.colors import Colors
+from components.lang import Lang
 
 pygame.init()
 pygame.font.init()
@@ -13,6 +15,9 @@ class Start:
 
         self.colors = Colors()
 
+        self.language = Lang()
+        self.lang = "en"
+
         self.window = pygame.display.set_mode((600, 1000))
 
         self.font_35 = pygame.font.SysFont(None, 35)
@@ -21,9 +26,18 @@ class Start:
         self.font_60 = pygame.font.SysFont(None, 60)
         self.running = True
 
-        pygame.display.set_caption("Tic-Tac-Toe")
+        self.base_path = os.path.dirname(__file__)
+        path = os.path.join(self.base_path, "files", "ico.png")
+        img = pygame.image.load(path).convert_alpha()
+        pygame.display.set_icon(img)
 
-        self.select1 = Select(["Hráč vs. Hráč", "Hráč vs. Počítač EASY", "Hráč vs. Počítač MEDIUM", "Hráč vs. Počítač HARD", "Hráč vs. Počítač EXPERT", "Hráč vs. Hráč CHAOS", "Hráč vs. Počítač CHAOS"])
+        self.sound_background_path = os.path.join(self.base_path, "files", "background.mp3")
+
+        pygame.mixer.music.load(self.sound_background_path)
+        pygame.mixer.music.set_volume(0.04)
+        pygame.mixer.music.play(loops=-1)
+
+        self.select1 = Select(["Hráč vs. Hráč", "Hráč vs. Počítač EASY", "Hráč vs. Počítač MEDIUM", "Hráč vs. Počítač HARD", "Hráč vs. Počítač EXPERT", "Hráč vs. Hráč CHAOS", "Hráč vs. Počítač CHAOS", "Tréning s AI"])
         self.select2 = Select(["3x3", "4x4", "5x5"])
         self.select3 = Select(self.colors.get_color_list(without=["Black", "White"], default="Blue"))
         self.select4 = Select(self.colors.get_color_list(without=["Black", "White"], default="Red"))
@@ -34,8 +48,12 @@ class Start:
         self.writing = None
         self.step = None
 
+        self.sound_status = "on"
+
     def run(self):
         while self.running:
+            pygame.display.set_caption(self.language.translate(self.lang, "Piškvorky"))
+
             self.color_x = self.select3.get_current_option()[1]
             self.color_o = self.select4.get_current_option()[1]
 
@@ -63,6 +81,24 @@ class Start:
                         self.writing = 'y'
                     else:
                         self.writing = None
+
+                    self.sound_button_rect = pygame.Rect(0, 0, 60, 60)
+                    if self.sound_button_rect.collidepoint(event.pos):
+                        if self.sound_status == "on":
+                            self.sound_status = "off"
+                            pygame.mixer.music.pause()
+                        else:
+                            self.sound_status = "on"
+                            pygame.mixer.music.unpause()
+
+                    self.lang_button_rect = pygame.Rect(540, 0, 60, 60)
+                    if self.lang_button_rect.collidepoint(event.pos):
+                        if self.lang == "en":
+                            self.lang = "de"
+                        elif self.lang == "de":
+                            self.lang = "sk"
+                        elif self.lang == "sk":
+                            self.lang = "en"
 
                 if event.type == pygame.KEYDOWN:
                     if self.writing == 'x':
@@ -99,13 +135,13 @@ class Start:
                         elif self.step == "6_y_color":
                             self.step = "7_confirm"
                         elif self.step == "7_confirm":
-                            self.game_mode = self.select1.get_current_option()
+                            self.game_mode = self.language.translate(self.lang, self.select1.get_current_option())
                             self.board_size = int(self.select2.get_current_option()[0])
-                            self.player_x_name = self.user_text_x if self.user_text_x != "" else "Hráč 1"
-                            self.player_y_name = (self.user_text_y if self.user_text_y != "" else "Hráč 2") if "Hráč vs. Hráč" in self.game_mode else "AI hráč"
+                            self.player_x_name = self.user_text_x if self.user_text_x != "" else self.language.translate(self.lang, "Hráč 1")
+                            self.player_y_name = (self.user_text_y if self.user_text_y != "" else self.language.translate(self.lang, "Hráč 2")) if self.language.translate(self.lang, "Hráč vs. Hráč") in self.game_mode else self.language.translate(self.lang, "AI hráč")
                             self.player_x_color = self.select3.get_current_option()
                             self.player_y_color = self.select4.get_current_option()
-                            return [self.game_mode, self.board_size, self.player_x_name, self.player_y_name, self.player_x_color, self.player_y_color]
+                            return [self.game_mode, self.board_size, self.player_x_name, self.player_y_name, self.player_x_color, self.player_y_color, self.sound_status, self.lang]
                             self.running = False
                     
                     if event.key == pygame.K_LEFT:
@@ -145,16 +181,26 @@ class Start:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_x, mouse_y = event.pos
                     if self.rect_confirm_o.collidepoint((mouse_x, mouse_y)):
-                        self.game_mode = self.select1.get_current_option()
+                        self.game_mode = self.language.translate(self.lang, self.select1.get_current_option())
                         self.board_size = int(self.select2.get_current_option()[0])
-                        self.player_x_name = self.user_text_x if self.user_text_x != "" else "Hráč 1"
-                        self.player_y_name = (self.user_text_y if self.user_text_y != "" else "Hráč 2") if "Hráč vs. Hráč" in self.game_mode else "AI hráč"
+                        self.player_x_name = self.user_text_x if self.user_text_x != "" else self.language.translate(self.lang, "Hráč 1")
+                        self.player_y_name = (self.user_text_y if self.user_text_y != "" else self.language.translate(self.lang, "Hráč 2")) if (self.language.translate(self.lang, "Hráč vs. Hráč") in self.game_mode or self.language.translate(self.lang, "Multiplayer") in self.game_mode) else self.language.translate(self.lang, "AI hráč")
                         self.player_x_color = self.select3.get_current_option()
                         self.player_y_color = self.select4.get_current_option()
-                        return [self.game_mode, self.board_size, self.player_x_name, self.player_y_name, self.player_x_color, self.player_y_color]
+                        return [self.game_mode, self.board_size, self.player_x_name, self.player_y_name, self.player_x_color, self.player_y_color, self.sound_status, self.lang]
                         self.running = False
         
             self.window.fill((255, 255, 255))
+
+            sound_path = os.path.join(self.base_path, "files", "sound_" + str(self.sound_status) + ".png")
+            sound = pygame.image.load(sound_path).convert_alpha()
+            sound = pygame.transform.scale(sound, (55, 55))
+            self.window.blit(sound, (5, 5))
+
+            lang_path = os.path.join(self.base_path, "files", str(self.lang) + ".png")
+            lang = pygame.image.load(lang_path).convert_alpha()
+            lang = pygame.transform.scale(lang, (55, 55))
+            self.window.blit(lang, (540, 5))
 
             if self.step == "1_mode":
                 self.rect_left1_o = pygame.Rect(180, 255, 240, 40)
@@ -183,40 +229,40 @@ class Start:
 
             pygame.draw.circle(self.window, self.color_o, (350, 75), 32.5, 12)
             
-            text_heading = self.font_60.render("Vitaj v hre!", True, (0, 0, 0))
+            text_heading = self.font_60.render(self.language.translate(self.lang, "Vitaj v hre!"), True, (0, 0, 0))
             rect_heading = text_heading.get_rect(center=(300, 150))
             self.window.blit(text_heading, rect_heading)
 
-            text_q1 = self.font_40.render("Vyber si herný mód:", True, (0, 0, 0))
+            text_q1 = self.font_40.render(self.language.translate(self.lang, "Vyber si herný mód:"), True, (0, 0, 0))
             rect_q1 = text_q1.get_rect(center=(300, 225))
             self.window.blit(text_q1, rect_q1)
 
-            opt1 = self.select1.get_current_option()
+            opt1 = self.language.translate(self.lang, self.select1.get_current_option())
 
             text_opt1 = self.font_35.render(opt1, True, (0, 0, 0))
             rect_opt1 = text_opt1.get_rect(center=(300, 275))
             self.window.blit(text_opt1, rect_opt1)
 
             text_left1 = self.font_40.render("<", True, (0, 0, 0))
-            rect_left1 = text_left1.get_rect(center=(125, 275))
+            rect_left1 = text_left1.get_rect(center=(80, 275))
             self.window.blit(text_left1, rect_left1)
 
             text_right1 = self.font_40.render(">", True, (0, 0, 0))
-            rect_right1 = text_right1.get_rect(center=(475, 275))
+            rect_right1 = text_right1.get_rect(center=(520, 275))
             self.window.blit(text_right1, rect_right1)
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if rect_left1.collidepoint((mouse_x, mouse_y)):
                 text_left1 = self.font_40.render("<", True, self.color_x)
-                rect_left1 = text_left1.get_rect(center=(125, 275))
+                rect_left1 = text_left1.get_rect(center=(80, 275))
                 self.window.blit(text_left1, rect_left1)
             elif rect_right1.collidepoint((mouse_x, mouse_y)):
                 text_right1 = self.font_40.render(">", True, self.color_o)
-                rect_right1 = text_right1.get_rect(center=(475, 275))
+                rect_right1 = text_right1.get_rect(center=(520, 275))
                 self.window.blit(text_right1, rect_right1)
 
 
-            text_q2 = self.font_40.render("Vyber si veľkosť hracej plochy:", True, (0, 0, 0))
+            text_q2 = self.font_40.render(self.language.translate(self.lang, "Vyber si veľkosť hracej plochy:"), True, (0, 0, 0))
             rect_q2 = text_q2.get_rect(center=(300, 350))
             self.window.blit(text_q2, rect_q2)
 
@@ -227,33 +273,33 @@ class Start:
             self.window.blit(text_opt2, rect_opt2)
 
             text_left2 = self.font_40.render("<", True, (0, 0, 0))
-            rect_left2 = text_left2.get_rect(center=(125, 400))
+            rect_left2 = text_left2.get_rect(center=(80, 400))
             self.window.blit(text_left2, rect_left2)
 
             text_right2 = self.font_40.render(">", True, (0, 0, 0))
-            rect_right2 = text_right2.get_rect(center=(475, 400))
+            rect_right2 = text_right2.get_rect(center=(520, 400))
             self.window.blit(text_right2, rect_right2)
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if rect_left2.collidepoint((mouse_x, mouse_y)):
                 text_left2 = self.font_40.render("<", True, self.color_x)
-                rect_left2 = text_left2.get_rect(center=(125, 400))
+                rect_left2 = text_left2.get_rect(center=(80, 400))
                 self.window.blit(text_left2, rect_left2)
             elif rect_right2.collidepoint((mouse_x, mouse_y)):
                 text_right2 = self.font_40.render(">", True, self.color_o)
-                rect_right2 = text_right2.get_rect(center=(475, 400))
+                rect_right2 = text_right2.get_rect(center=(520, 400))
                 self.window.blit(text_right2, rect_right2)
 
             pygame.draw.line(self.window, self.color_x, (125, 525), (175, 475), 20)
             pygame.draw.line(self.window, self.color_x, (175, 525), (125, 475), 20)
 
-            pygame.draw.circle(self.window, self.color_o, (475, 500), 32.5, 12)
+            pygame.draw.circle(self.window, self.color_o, (450, 500), 32.5, 12)
 
-            self.text_x = self.font_40.render("Zadaj meno:", True, (0, 0, 0))
+            self.text_x = self.font_40.render(self.language.translate(self.lang, "Zadaj meno:"), True, (0, 0, 0))
             self.rect_x = self.text_x.get_rect(center=(150, 575))
             self.window.blit(self.text_x, self.rect_x)
 
-            self.text_y = self.font_40.render("Zadaj meno:", True, (0, 0, 0))
+            self.text_y = self.font_40.render(self.language.translate(self.lang, "Zadaj meno:"), True, (0, 0, 0))
             self.rect_y = self.text_y.get_rect(center=(450, 575))
             self.window.blit(self.text_y, self.rect_y)
 
@@ -264,7 +310,7 @@ class Start:
             self.rect_x_o = pygame.Rect(25, 600, 250, 40)
             pygame.draw.rect(self.window, (0, 0, 0), self.rect_x_o, 3)
 
-            self.text_y = self.font_35.render((self.user_text_y if "Hráč vs. Hráč" in opt1 else "AI hráč"), True, (0, 0, 0))
+            self.text_y = self.font_35.render((self.user_text_y if (self.language.translate(self.lang, "Hráč vs. Hráč") in opt1 or self.language.translate(self.lang, "Multiplayer") in opt1) else self.language.translate(self.lang, "AI hráč")), True, (0, 0, 0))
             self.rect_y = self.text_y.get_rect(center=(450, 620))
             self.window.blit(self.text_y, self.rect_y)
 
@@ -279,11 +325,11 @@ class Start:
                 self.rect_y_o = pygame.Rect(325, 600, 250, 40)
                 pygame.draw.rect(self.window, self.color_o, self.rect_y_o, 3)
 
-            self.text_x = self.font_40.render("Vyber si farbu:", True, (0, 0, 0))
+            self.text_x = self.font_40.render(self.language.translate(self.lang, "Vyber si farbu:"), True, (0, 0, 0))
             self.rect_x = self.text_x.get_rect(center=(150, 700))
             self.window.blit(self.text_x, self.rect_x)
 
-            self.text_y = self.font_40.render("Vyber si farbu:", True, (0, 0, 0))
+            self.text_y = self.font_40.render(self.language.translate(self.lang, "Vyber si farbu:"), True, (0, 0, 0))
             self.rect_y = self.text_y.get_rect(center=(450, 700))
             self.window.blit(self.text_y, self.rect_y)
 
@@ -331,16 +377,16 @@ class Start:
                 rect_right4 = text_right4.get_rect(center=(550, 765))
                 self.window.blit(text_right4, rect_right4)
 
-            self.text_confirm = self.font_35.render("POTVRDIŤ A ZAČAŤ HRU", True, (0, 0, 0))
+            self.text_confirm = self.font_35.render(self.language.translate(self.lang, "POTVRDIŤ A ZAČAŤ HRU"), True, (0, 0, 0))
             self.rect_confirm = self.text_confirm.get_rect(center=(300, 900))
             self.window.blit(self.text_confirm, self.rect_confirm)
 
-            self.rect_confirm_o = pygame.Rect(140, 870, 320, 60)
+            self.rect_confirm_o = pygame.Rect(80, 870, 440, 60)
             pygame.draw.rect(self.window, (0, 0, 0), self.rect_confirm_o, 3)
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if self.rect_confirm_o.collidepoint((mouse_x, mouse_y)):
-                self.rect_confirm_o = pygame.Rect(140, 870, 320, 60)
+                self.rect_confirm_o = pygame.Rect(80, 870, 440, 60)
                 pygame.draw.line(self.window, self.color_x, self.rect_confirm_o.topleft, self.rect_confirm_o.bottomleft, 3)
                 pygame.draw.line(self.window, self.color_o, self.rect_confirm_o.topright, self.rect_confirm_o.bottomright, 3)
                 pygame.draw.line(self.window, self.color_x, self.rect_confirm_o.topleft, self.rect_confirm_o.midtop, 3)
